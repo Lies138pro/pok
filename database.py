@@ -1,21 +1,30 @@
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Récupération de la clé Supabase depuis les variables d'environnement
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+# Définir la base de données
+DATABASE_URL = os.getenv("https://ogwvmdajomoojvatfusu.supabase.co")  # L'URL de la base de données Supabase
+# Exemple : postgresql://postgres:password@db.xxxx.supabase.co:5432/postgres
 
-# Vérification si la clé est bien chargée
-print(f"SUPABASE_KEY: {SUPABASE_KEY}")
-
-# Construction de l'URL de connexion PostgreSQL
-DATABASE_URL = f"postgresql://postgres:{SUPABASE_KEY}@db.xxxxxx.supabase.co:5432/postgres?sslmode=require"
-
-# Création du moteur SQLAlchemy
+# Créer un moteur de base de données
 engine = create_engine(DATABASE_URL)
 
-# Création de la session
+# Créer une instance de base pour les modèles
+Base = declarative_base()
+
+# Définir la classe Pokemon
+class Pokemon(Base):
+    __tablename__ = "pokemons"  # Nom de la table dans la base de données
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    type = Column(String)
+
+# Créer une session locale pour interagir avec la base de données
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base pour les modèles SQLAlchemy
-Base = declarative_base()
+# Fonction pour initialiser la base de données
+def init_db():
+    # Crée toutes les tables si elles n'existent pas déjà
+    Base.metadata.create_all(bind=engine)
